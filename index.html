@@ -147,7 +147,7 @@ $('search').addEventListener('keydown',event=>{
  if(event.key==='Escape'){expanded=false;render();$('search').blur()}
 });
 document.addEventListener('pointerdown',event=>{
- if(!event.target.closest('#brandPicker') && !event.target.closest('#popular') && expanded){expanded=false;render()}
+ if(!event.target.closest('#brandPicker') && !event.target.closest('#popular') && expanded){expanded=false;$('allBrands').classList.remove('open');$('search').setAttribute('aria-expanded','false');$('brandArrowToggle').setAttribute('aria-expanded','false')}
 });
 $('submit').addEventListener('click',()=>{if(!selected){$('error').textContent='Please select your car brand to continue.';$('search').focus();return}window.showVehicleStep(selected)});$('close').addEventListener('click',()=>$('next').close());$('continue').addEventListener('click',()=>{$('next').close(); /* Replace with the next-stage model/year screen integration. */});render();
 </script>
@@ -323,4 +323,31 @@ function updateConditionalFields(){
 form.querySelectorAll('input[name="ownership"]').forEach(r=>r.addEventListener('change',updateConditionalFields));
 updateConditionalFields();
 })();
-</script></body></html>
+</script><script>
+(function(){
+  function chooseBrand(event){
+    const button=event.target.closest('#popular button.brand, #results button.brand');
+    if(!button)return;
+    const label=button.querySelector('span:last-child');
+    const brand=label ? label.textContent.trim() : '';
+    if(!brand)return;
+    event.preventDefault();event.stopImmediatePropagation();
+    const selection=document.getElementById('selection');
+    if(selection)selection.textContent='Selected: '+brand;
+    if(typeof window.showVehicleStep==='function'){
+      window.showVehicleStep(brand);
+    } else {
+      const first=document.getElementById('firstStep');
+      const second=document.getElementById('vehicleStep');
+      if(first && second){first.hidden=true;second.hidden=false;}
+      const make=document.getElementById('vehicleMake');
+      if(make)make.value=brand;
+      const chosen=document.getElementById('chosenBrand');
+      if(chosen)chosen.textContent=brand;
+      window.scrollTo(0,0);
+    }
+  }
+  document.addEventListener('click',chooseBrand,true);
+})();
+</script>
+</body></html>
